@@ -1,0 +1,194 @@
+{
+  "name": "ai-readiness-index",
+  "displayName": "AI-Readiness Index",
+  "description": "Score any local repository 0-100 on AI coding-assistant readiness across six weighted dimensions, with an actionable remediation matrix.",
+  "version": "0.1.0",
+  "publisher": "ankitsaxena",
+  "license": "MIT",
+  "icon": "media/icon.png",
+  "engines": {
+    "vscode": "^1.96.0"
+  },
+  "categories": [
+    "Linters",
+    "Education",
+    "Other"
+  ],
+  "keywords": [
+    "ai",
+    "copilot",
+    "readiness",
+    "code quality",
+    "repository health",
+    "documentation",
+    "audit"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ankitsaxena86/ai-readiness-index.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ankitsaxena86/ai-readiness-index/issues"
+  },
+  "homepage": "https://github.com/ankitsaxena86/ai-readiness-index#readme",
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "ari.scanRepository",
+        "title": "Scan Repository",
+        "category": "AI-Readiness Index"
+      },
+      {
+        "command": "ari.showResults",
+        "title": "Show Last Results",
+        "category": "AI-Readiness Index"
+      }
+    ],
+    "chatParticipants": [
+      {
+        "id": "ari.chat",
+        "name": "ari",
+        "fullName": "AI-Readiness Index",
+        "description": "Scan this repo's AI-readiness and explain the score",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "scan",
+            "description": "Run a fresh AI-readiness scan and show the summary"
+          },
+          {
+            "name": "fixes",
+            "description": "Show the remediation checklist from the last scan"
+          },
+          {
+            "name": "explain",
+            "description": "Explain one dimension's score, e.g. /explain documentation"
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "AI-Readiness Index",
+      "properties": {
+        "ari.weights.context": {
+          "type": "number",
+          "default": 25,
+          "minimum": 0,
+          "markdownDescription": "Relative weight of the **Context** dimension. Weights are normalized across all six dimensions, so only their ratios matter."
+        },
+        "ari.weights.verifiability": {
+          "type": "number",
+          "default": 20,
+          "minimum": 0,
+          "markdownDescription": "Relative weight of the **Verifiability** dimension (tests, CI, linting)."
+        },
+        "ari.weights.reproducibility": {
+          "type": "number",
+          "default": 15,
+          "minimum": 0,
+          "markdownDescription": "Relative weight of the **Reproducibility** dimension (setup docs, pinned deps, lockfiles, containers)."
+        },
+        "ari.weights.documentation": {
+          "type": "number",
+          "default": 15,
+          "minimum": 0,
+          "markdownDescription": "Relative weight of the **Documentation** dimension (docs beyond the README, ADRs, CONTRIBUTING)."
+        },
+        "ari.weights.navigability": {
+          "type": "number",
+          "default": 15,
+          "minimum": 0,
+          "markdownDescription": "Relative weight of the **Navigability** dimension (folder structure, naming, consistent patterns)."
+        },
+        "ari.weights.changeSafety": {
+          "type": "number",
+          "default": 10,
+          "minimum": 0,
+          "markdownDescription": "Relative weight of the **Change safety** dimension (regression tests, branch protection, changelog discipline)."
+        },
+        "ari.remediationThreshold": {
+          "type": "number",
+          "default": 70,
+          "minimum": 0,
+          "maximum": 100,
+          "markdownDescription": "Dimensions scoring **below** this value (0-100) generate remediation items."
+        },
+        "ari.exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/node_modules/**",
+            "**/.vscode-test/**",
+            "**/dist/**",
+            "**/out/**",
+            "**/build/**",
+            "**/.git/**",
+            "**/coverage/**",
+            "**/.venv/**",
+            "**/__pycache__/**",
+            "**/vendor/**",
+            "**/target/**",
+            "**/*.asar.unpacked/**",
+            "**/test/fixtures/**",
+            "**/tests/fixtures/**",
+            "**/__fixtures__/**"
+          ],
+          "markdownDescription": "Glob patterns excluded from scanning to keep scans fast and relevant."
+        },
+        "ari.maxFiles": {
+          "type": "number",
+          "default": 20000,
+          "minimum": 100,
+          "markdownDescription": "Stop walking the workspace after this many files. Protects against pathologically large repos; raise it if a big monorepo is being under-scanned."
+        },
+        "ari.scanOnStartup": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Run a lightweight background scan when a workspace is opened."
+        },
+        "ari.rescanOnConfigChange": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Re-run the scan automatically when weights, the threshold, or exclude patterns change."
+        },
+        "ari.showStatusBarItem": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show the last scan's overall score in the status bar."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "node esbuild.js --production",
+    "compile-tests": "tsc -p ./tsconfig.test.json",
+    "scan": "tsc -p ./tsconfig.test.json && node scripts/scan.mjs",
+    "pretest": "npm run compile-tests && npm run compile",
+    "test": "vscode-test",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/vscode": "^1.96.0",
+    "@typescript-eslint/eslint-plugin": "^8.18.0",
+    "@typescript-eslint/parser": "^8.18.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "esbuild": "^0.24.0",
+    "eslint": "^9.17.0",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

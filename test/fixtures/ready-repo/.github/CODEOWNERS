@@ -1,0 +1,6 @@
+# Default owners for everything in the repo.
+*                   @widget-toolkit/maintainers
+
+# The public API surface needs an API reviewer.
+/src/index.ts       @widget-toolkit/api-reviewers
+/docs/api.md        @widget-toolkit/api-reviewers

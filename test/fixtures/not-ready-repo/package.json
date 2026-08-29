@@ -1,0 +1,9 @@
+{
+  "name": "proj",
+  "version": "0.0.1",
+  "main": "main.js",
+  "dependencies": {
+    "lodash": "^4.0.0",
+    "express": "*"
+  }
+}
